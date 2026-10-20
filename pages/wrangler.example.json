@@ -1,0 +1,15 @@
+{
+  "name": "xirdavat-1001",
+  "pages_build_output_dir": "../.pages-output",
+  "compatibility_date": "2026-10-20",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "YOUR_DATABASE_NAME",
+      "database_id": "YOUR_DATABASE_ID"
+    }
+  ]
+}

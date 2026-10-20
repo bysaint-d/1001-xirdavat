@@ -1,0 +1,16 @@
+node_modules/
+.pages-output/
+.wrangler/
+.sites-runtime/
+.env*
+!.env.example
+.dev.vars*
+*.pem
+*.key
+*.db
+*.sqlite*
+*.dump
+backups/
+outputs/
+work/
+pages/wrangler.json
