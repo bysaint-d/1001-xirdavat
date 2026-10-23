@@ -37,6 +37,6 @@ export default {async fetch(request,env,ctx){try{
  }
  const known=path==='/'||path==='/cart'||path.startsWith('/product/')||path.startsWith('/shop/')||privatePage;
  if(!known)return html('<main class="auth-wrap"><h1>Səhifə tapılmadı</h1><a href="/">Bazara qayıt</a></main>',{status:404});
- const bar=`<div class="pages-account"><a href="/">Bazar</a>${staff?'<span>İdarəetmə</span><button data-logout>Çıxış</button>':`<a href="${user?'/account':'/login'}">${user?esc(user.displayName):'Müştəri girişi'}</a><a href="/seller/login">Satıcı girişi</a>${user?'<a href="/notifications">Bildirişlər</a><button data-logout>Çıxış</button>':''}`}</div>`;
+ const bar=`<div class="pages-account"><a href="/">Bazar</a>${staff?'<span>İdarəetmə</span><button data-logout>Çıxış</button>':`<a href="${user?(a==='seller'?'/account?as=seller':'/account'):'/login'}">${user?esc(user.displayName):'Müştəri girişi'}</a><a href="/seller/login">Satıcı girişi</a>${user?'<a href="/notifications'+(a==='seller'?'?as=seller':'')+'">Bildirişlər</a><button data-logout>Çıxış</button>':''}`}</div>`;
  return html(bar+markup.replace('<main>','<main>'+summary)+'<script src="/app.js?v=2"></script><script src="/market.js?v=2"></script><script src="/enhancements.js?v=2"></script>',{title,description,url:url.origin+path,extra,privatePage,staff});
  }catch(e){console.error('request failed');return html('<main class="auth-wrap panel"><h1>Əməliyyat tamamlanmadı</h1><p>Bir az sonra yenidən yoxla.</p><a href="/">Bazara qayıt</a></main>',{status:500,privatePage:true})}}};
