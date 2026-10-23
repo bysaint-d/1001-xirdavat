@@ -8,9 +8,11 @@
   },
   "scripts": {
     "build": "node scripts/build-pages.mjs",
-    "test": "node scripts/test-market.mjs && node scripts/test-pages.mjs && node scripts/test-odero.mjs",
-    "deploy": "npm run build && wrangler pages deploy .pages-output --project-name xirdavat-1001",
-    "test:odero": "node scripts/test-odero.mjs"
+    "test": "node scripts/test-market.mjs && node scripts/test-pages.mjs && node scripts/test-odero.mjs && node scripts/test-database.mjs",
+    "deploy": "node scripts/deploy.mjs",
+    "test:odero": "node scripts/test-odero.mjs",
+    "dev": "node scripts/preview.mjs",
+    "db:migrate": "node scripts/cloudflare-db.mjs migrate"
   },
   "devDependencies": {
     "esbuild": "0.28.2",

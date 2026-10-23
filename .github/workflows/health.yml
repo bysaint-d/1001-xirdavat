@@ -1,0 +1,21 @@
+name: Site health
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/30 * * * *'
+permissions:
+  contents: read
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check public service health
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: |
+          if [ -z "$SITE_URL" ]; then
+            echo "Set the SITE_URL repository variable to enable external monitoring."
+            exit 0
+          fi
+          curl --fail --max-time 20 --retry 2 "$SITE_URL/api/health" -o health.json
+          python -c 'import json; assert json.load(open("health.json"))["ok"] is True'

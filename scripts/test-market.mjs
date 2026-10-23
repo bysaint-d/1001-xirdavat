@@ -15,7 +15,7 @@ const db={
  async batch(list){sqlite.exec('BEGIN');try{const result=list.map(s=>({meta:{changes:Number(sqlite.prepare(s.sql).run(...s.args).changes)}}));sqlite.exec('COMMIT');return result}catch(e){sqlite.exec('ROLLBACK');throw e}}
 };
 const files=new Map(),env={DB:db,ADMIN_EMAILS:'admin@test.local',BUCKET:{async put(k,v){files.set(k,new Uint8Array(v))},async get(k){return files.has(k)?{body:files.get(k)}:null},async delete(k){files.delete(k)}}};
-const actor=id=>({userId:id,email:id+'@test.local',displayName:id});
+const actor=id=>({userId:id,email:id+'@test.local',displayName:id,accountType:['seller','other'].includes(id)?'seller':'buyer'});
 let checks=0;
 async function call(user,path,method='GET',data,expected=200,extraHeaders={}){const req=new Request('https://market.test/api/'+path,{method,headers:{origin:'https://market.test','content-type':'application/json',...extraHeaders},body:method==='GET'?undefined:typeof data==='string'?data:JSON.stringify(data||{})}),res=await marketRequest(req,env,user?actor(user):null);const result=await res.json();assert.equal(res.status,expected,`${method} ${path}: ${JSON.stringify(result)}`);checks++;return result}
 await call(null,'bootstrap');await call(null,'cart','PUT',{product:'x',qty:1},401);await call('buyer','admin','GET',undefined,403);await call('admin','admin/seed','POST');await call('admin','admin/seed','POST');
