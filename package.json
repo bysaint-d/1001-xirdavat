@@ -8,8 +8,9 @@
   },
   "scripts": {
     "build": "node scripts/build-pages.mjs",
-    "test": "node scripts/test-market.mjs && node scripts/test-pages.mjs",
-    "deploy": "npm run build && wrangler pages deploy .pages-output --project-name xirdavat-1001"
+    "test": "node scripts/test-market.mjs && node scripts/test-pages.mjs && node scripts/test-odero.mjs",
+    "deploy": "npm run build && wrangler pages deploy .pages-output --project-name xirdavat-1001",
+    "test:odero": "node scripts/test-odero.mjs"
   },
   "devDependencies": {
     "esbuild": "0.28.2",

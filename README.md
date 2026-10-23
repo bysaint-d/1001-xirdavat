@@ -25,3 +25,7 @@ npm run build
 Mövcud saytda hesablar şəxsi dəvətlə açılır. Boş bazada ilk admin istifadəçisi və hash-lənmiş, vaxtı məhdud dəvət qeydi operator tərəfindən yaradılmalıdır; repozitoriyada hazır admin hesabı və universal şifrə yoxdur.
 
 Məhsul nümunələri lib/seed-data.mjs faylındadır; Birmarket məhsul mənbələri həmin qeydlərdə göstərilib. Ödəniş yalnız test simulyasiyasıdır; real kart məlumatı daxil etməyin. Test sifarişi real ödəniş sübutu deyil.
+
+## Odero
+
+Odero server adapteri hazırlanıb və offline yoxlanılıb. Checkout-a hələ qoşulmayıb; canlı ödəniş aktiv deyil. Hesab tələbləri və qalan inteqrasiya addımları [ODERO.md](ODERO.md) faylındadır.

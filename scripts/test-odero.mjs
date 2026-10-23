@@ -1,0 +1,26 @@
+import assert from 'node:assert/strict';
+import {oderoSignature,oderoConfig,checkoutPayload,assertVerifiedPayment,OderoClient} from '../lib/odero.mjs';
+let checks=0;const check=fn=>{fn();checks++};
+const signing={baseUrl:'http://localhost:8000',apiKey:'api-key',secretKey:'secret-key',nonce:'1234'};
+// Known answers from the provider SDK, independent of this implementation.
+assert.equal(await oderoSignature({...signing,path:'/installment/v1/installments'}),'uK7LkWOEzVH+Px/YOiMuSXvPkHLR4KoA7PuykXcYovQ=');checks++;
+assert.equal(await oderoSignature({...signing,path:'/payment/v1/cards',body:'{"cardUserKey":"de050909-39a9-473c-a81a-f186dd55cfef"}'}),'kQm62AfjXCw6rS6QBCLXta9tV1GqD/SXsAlYP+cEhG8=');checks++;
+assert.equal(await oderoSignature({...signing,path:'/onboarding/v1/members?name=Zeytinya%C4%9F%C4%B1%20%C3%9Cretim'}),'vxYA+5LH3F4m8tHQA2LpVBwzVgCqGRHue4XAgcVjjYQ=');checks++;
+const env={ODERO_API_KEY:'fake-unit-test-key',ODERO_SECRET_KEY:'fake-unit-test-secret'},session={id:'session-unit-test',total:2800,shipping:300,lines:[{product:'p1',store:'s1',name:'Məhsul',price:1250,qty:2}]},options={callbackUrl:'https://market.test/api/payments/odero/callback',subMerchants:{s1:{id:1,payoutBasisPoints:9000}}};
+check(()=>assert.equal(oderoConfig(env).baseUrl,'https://sbx-api-gateway.odero.az'));
+check(()=>assert.throws(()=>oderoConfig({...env,ODERO_ENV:'custom'})));
+check(()=>assert.throws(()=>oderoConfig({})));
+const payload=checkoutPayload(session,options);check(()=>assert.equal(payload.items[0].subMerchantPrice,22.5));check(()=>assert.equal(payload.price,28));
+check(()=>assert.throws(()=>checkoutPayload(session,{...options,subMerchants:{}})));
+check(()=>assert.throws(()=>checkoutPayload({...session,total:1},options)));
+check(()=>assert.throws(()=>checkoutPayload(session,{...options,callbackUrl:'http://market.test/callback'})));
+const success={id:42,paymentStatus:'SUCCESS',currency:'AZN',conversationId:session.id,price:28,paidPrice:28};
+check(()=>assert.equal(assertVerifiedPayment(success,session).paymentId,'42'));
+for(const change of [{paymentStatus:'FAILURE'},{paymentStatus:'INIT_THREEDS'},{currency:'TRY'},{conversationId:'another-session'},{paidPrice:1},{price:1},{id:undefined},{paymentRefunds:[{id:1}]}])check(()=>assert.throws(()=>assertVerifiedPayment({...success,...change},session)));
+const token='00000000-0000-4000-8000-000000000001';let calls=0;
+const client=new OderoClient(env,{fetchImpl:async(url,init)=>{calls++;assert.ok(url.startsWith('https://sbx-api-gateway.odero.az/'));assert.equal(init.headers['x-auth-version'],'V1');assert.equal(init.redirect,'error');assert.ok(init.headers['x-signature']);return Response.json({data:init.method==='POST'?{token,pageUrl:'https://sbx-checkout.odero.az/pay',tokenExpireDate:'2026-10-23T12:00:00'}:success})}});
+assert.equal((await client.initialize(session,options)).token,token);checks++;assert.equal((await client.verify(token,session)).total,2800);checks++;
+await assert.rejects(()=>client.verify('../escape',session));checks++;
+const bad=new OderoClient(env,{fetchImpl:async()=>Response.json({data:{token,pageUrl:'https://evil.test/pay'}})});await assert.rejects(()=>bad.initialize(session,options));checks++;
+let retries=0;const timeout=new OderoClient(env,{fetchImpl:async()=>{retries++;throw Error('private upstream value')}});await assert.rejects(()=>timeout.initialize(session,options),/reconcile/);check(()=>assert.equal(retries,1));check(()=>assert.equal(calls,2));
+console.log(`PASS: ${checks} Odero adapter checks (offline mocks; no bank transaction performed).`);
